@@ -37,6 +37,7 @@ const navigation = [
 
 function NavUser() {
   const { user, logout } = useAuth();
+  // must change the logo and add breadcrumbs and test mobile.
 
   return (
     <SidebarMenu>
