@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 
 interface FormData {
-  programmingLanguage: string;
+  programmingLanguage: "typeScript" | "javaScript" | "python" | "java" | "go";
   experienceLevel: "beginner" | "intermediate" | "advanced" | "children";
   learningGoal: string;
   timeCommitment: string;
@@ -27,7 +27,7 @@ interface FormData {
 
 export default function Profile() {
   const [formData, setFormData] = useState<FormData>({
-    programmingLanguage: "",
+    programmingLanguage: "javaScript",
     experienceLevel: "beginner",
     learningGoal: "",
     timeCommitment: "",
@@ -138,17 +138,16 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-12">
-      <div className="max-w-6xl mx-auto px-4">
-        {/* Progress Dashboard */}
+    <div className="min-h-screen bg-background py-8">
+      <div className="max-w-4xl mx-auto px-4">
         {roadmap.length > 0 && (
-          <div className="mb-8">
+          <div className="mb-6">
             <ProgressDashboard progress={progress} />
           </div>
         )}
 
-        <Card className="p-8">
-          <h1 className="text-4xl font-bold mb-8 text-center">
+        <Card className="p-6">
+          <h1 className="text-2xl font-bold mb-6 text-center">
             Create Your Learning Roadmap
           </h1>
 
@@ -157,75 +156,92 @@ export default function Profile() {
               e.preventDefault();
               generateRoadmap();
             }}
-            className="space-y-6"
+            className="space-y-4"
           >
-            <div className="space-y-2">
-              <Label htmlFor="programmingLanguage">Programming Language</Label>
-              <Input
-                id="programmingLanguage"
-                value={formData.programmingLanguage}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    programmingLanguage: e.target.value,
-                  })
-                }
-                required
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="programmingLanguage">
+                  Programming Language
+                </Label>
+                <Select
+                  value={formData.programmingLanguage}
+                  onValueChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      programmingLanguage:
+                        value as FormData["programmingLanguage"],
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select programming language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="typeScript">TypeScript</SelectItem>
+                    <SelectItem value="javaScript">JavaScript</SelectItem>
+                    <SelectItem value="python">Python</SelectItem>
+                    <SelectItem value="java">Java</SelectItem>
+                    <SelectItem value="go">Go</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="experienceLevel">Experience Level</Label>
+                <Select
+                  value={formData.experienceLevel}
+                  onValueChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      experienceLevel: value as FormData["experienceLevel"],
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select experience level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="children">
+                      Children (5-12 years)
+                    </SelectItem>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="experienceLevel">Experience Level</Label>
-              <Select
-                value={formData.experienceLevel}
-                onValueChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    experienceLevel: value as FormData["experienceLevel"],
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select experience level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="children">
-                    Children (5-12 years)
-                  </SelectItem>
-                  <SelectItem value="beginner">Beginner</SelectItem>
-                  <SelectItem value="intermediate">Intermediate</SelectItem>
-                  <SelectItem value="advanced">Advanced</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="timeCommitment">Time Commitment</Label>
+                <Input
+                  id="timeCommitment"
+                  value={formData.timeCommitment}
+                  onChange={(e) =>
+                    setFormData({ ...formData, timeCommitment: e.target.value })
+                  }
+                  placeholder="e.g., 2 hours per day"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="learningGoal">Learning Goal</Label>
+                <Textarea
+                  id="learningGoal"
+                  value={formData.learningGoal}
+                  onChange={(e: any) =>
+                    setFormData({ ...formData, learningGoal: e.target.value })
+                  }
+                  className="h-[40px] resize-none"
+                  placeholder="What do you want to achieve?"
+                  required
+                />
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="learningGoal">Learning Goal</Label>
-              <Textarea
-                id="learningGoal"
-                value={formData.learningGoal}
-                onChange={(e: any) =>
-                  setFormData({ ...formData, learningGoal: e.target.value })
-                }
-                className="min-h-[100px]"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="timeCommitment">Time Commitment</Label>
-              <Input
-                id="timeCommitment"
-                value={formData.timeCommitment}
-                onChange={(e) =>
-                  setFormData({ ...formData, timeCommitment: e.target.value })
-                }
-                placeholder="e.g., 2 hours per day"
-                required
-              />
-            </div>
-
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full mt-6" disabled={loading}>
               {loading ? (
                 <div className="flex items-center justify-center">
                   <svg
@@ -259,11 +275,9 @@ export default function Profile() {
 
         {/* Roadmap Visualization */}
         {roadmap.length > 0 && (
-          <div className="mt-12 space-y-8">
-            <h2 className="text-3xl font-bold text-center">
-              Your Learning Roadmap
-            </h2>
-            <div className="grid gap-6 md:grid-cols-2">
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold mb-6">Your Learning Roadmap</h2>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {roadmap.map((node) => (
                 <RoadmapNode key={node.id} node={node} />
               ))}

@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface PracticeButtonProps {
   nodeId: string;
@@ -9,9 +10,9 @@ export function PracticeButton({
   nodeId,
   practicePrompt,
 }: PracticeButtonProps) {
+  const navigate = useNavigate();
   const handlePractice = () => {
-    // navigate(`/practice?nodeId=${nodeId}&prompt=${practicePrompt}`);
-    console.log(nodeId, practicePrompt);
+    navigate(`/practice?nodeId=${nodeId}&prompt=${practicePrompt}`);
   };
 
   return (

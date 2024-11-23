@@ -5,11 +5,12 @@ import {
   Navigate,
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { Sidebar } from "@/components/Sidebar";
+import { AppSidebar } from "@/components/Sidebar";
 import Login from "@/pages/Login";
 import Profile from "@/pages/Profile";
-// import Dashboard from "@/pages/Dashboard";
-// import Practice from "@/pages/Practice";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import Practice from "./pages/Practice";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -23,9 +24,22 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex">
-      <Sidebar className="w-64 border-r" />
-      <main className="flex-1">{children}</main>
+    <div className="flex min-h-screen bg-muted">
+      <SidebarProvider>
+        <AppSidebar className="w-64 border-r" />
+        <div className="flex-1 p-4">
+          <div className="rounded-xl bg-background min-h-[calc(100vh-2rem)] shadow-lg">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b">
+              <div className="flex items-center gap-2 px-4">
+                <SidebarTrigger className="-ml-1" />
+                <Separator orientation="vertical" className="mr-2 h-4" />
+                {/* Add your breadcrumb here if needed */}
+              </div>
+            </header>
+            <main className="p-6">{children}</main>
+          </div>
+        </div>
+      </SidebarProvider>
     </div>
   );
 }
@@ -56,7 +70,7 @@ function App() {
             path="/practice"
             element={
               <ProtectedRoute>
-                <div></div>
+                <Practice />
               </ProtectedRoute>
             }
           />

@@ -1,20 +1,24 @@
 import { Card } from "@/components/ui/card";
 import Editor from "@monaco-editor/react";
-import { LanguageSelect } from "./LanguageSelect";
-import { useState } from "react";
 
-export function CodeEditor() {
-  const [language, setLanguage] = useState("javascript");
+interface CodeEditorProps {
+  content: string;
+  onChange: (value: string) => void;
+  language: "typeScript" | "javaScript" | "python" | "java" | "go";
+}
 
+export const CodeEditor: React.FC<CodeEditorProps> = ({
+  content,
+  onChange,
+  language,
+}) => {
   return (
     <Card className="h-full p-4">
-      <div className="mb-4">
-        <LanguageSelect value={language} onValueChange={setLanguage} />
-      </div>
       <Editor
         height="90%"
         defaultLanguage={language}
-        defaultValue="// Start coding here..."
+        value={content}
+        onChange={(value) => onChange(value || "")}
         theme="vs-dark"
         className=""
         options={{
@@ -24,4 +28,4 @@ export function CodeEditor() {
       />
     </Card>
   );
-}
+};
