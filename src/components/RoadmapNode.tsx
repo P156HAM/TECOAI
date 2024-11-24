@@ -1,9 +1,30 @@
-import { BookOpen, Clock, Video, ExternalLink } from "lucide-react";
-import { RoadmapNode as RoadmapNodeType } from "@/types/roadmap";
-import { PracticeButton } from "./PracticeButton";
+import { BookOpen, Video, ExternalLink } from "lucide-react";
+import { ProjectIdea, RoadmapNode as RoadmapNodeType } from "@/types/roadmap";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { useProjects } from "@/contexts/ProjectContext";
 
 export function RoadmapNode({ node }: { node: RoadmapNodeType }) {
+  const navigate = useNavigate();
+  const { addProject } = useProjects();
+
+  const handleExtractProject = async (project: ProjectIdea) => {
+    try {
+      const enhancedProject = {
+        ...project,
+        id: Date.now().toString(),
+        sourceNode: node.title,
+        subject: node.subject,
+        status: "draft" as const,
+      };
+      addProject(enhancedProject);
+      navigate("/projects");
+    } catch (error) {
+      console.error("Error generating project plan:", error);
+    }
+  };
+
   return (
     <Card className="hover:shadow-lg transition-all duration-300">
       <CardHeader className="pb-2">
@@ -12,9 +33,64 @@ export function RoadmapNode({ node }: { node: RoadmapNodeType }) {
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">{node.description}</p>
 
-        <div className="flex items-center text-sm text-muted-foreground">
-          <Clock className="h-4 w-4 mr-2" />
-          <span>{node.timeEstimate}</span>
+        {/* Learning Objectives */}
+        <div className="space-y-2">
+          <h4 className="font-semibold">Learning Objectives</h4>
+          <ul className="list-disc list-inside text-sm">
+            {node.learningObjectives.map((objective, index) => (
+              <li key={index}>{objective}</li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Teaching Strategies */}
+        <div className="space-y-2">
+          <h4 className="font-semibold">Teaching Strategies</h4>
+          <ul className="list-disc list-inside text-sm">
+            {node.teachingStrategies.map((strategy, index) => (
+              <li key={index}>{strategy}</li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Project Ideas */}
+        {node.projectIdeas.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="font-semibold">Project Ideas</h4>
+            {node.projectIdeas.map((project, index) => (
+              <div key={index} className="p-3 bg-muted rounded-lg">
+                <h5 className="font-medium">{project.title}</h5>
+                <p className="text-sm">{project.description}</p>
+                <div className="flex justify-between items-center mt-2">
+                  <div className="flex gap-2 text-xs">
+                    <span className="px-2 py-1 bg-primary/10 rounded">
+                      {project.difficulty}
+                    </span>
+                    <span className="px-2 py-1 bg-primary/10 rounded">
+                      {project.estimatedDuration}
+                    </span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleExtractProject(project)}
+                  >
+                    Extract Project
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Common Misconceptions */}
+        <div className="space-y-2">
+          <h4 className="font-semibold">Common Misconceptions</h4>
+          <ul className="list-disc list-inside text-sm">
+            {node.commonMisconceptions.map((misconception, index) => (
+              <li key={index}>{misconception}</li>
+            ))}
+          </ul>
         </div>
 
         {/* Resources Section */}
@@ -70,7 +146,24 @@ export function RoadmapNode({ node }: { node: RoadmapNodeType }) {
           </div>
         )}
 
-        <PracticeButton nodeId={node.id} practicePrompt={node.practicePrompt} />
+        <div className="flex gap-2 mt-4">
+          <Button
+            variant="outline"
+            onClick={() => {
+              /* Create lesson plan */
+            }}
+          >
+            Create Lesson Plan
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              /* Create assessment */
+            }}
+          >
+            Create Assessment
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

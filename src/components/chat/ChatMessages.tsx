@@ -22,7 +22,7 @@ export function ChatMessages({ messages }: ChatMessagesProps) {
             } p-3 rounded-lg`}
           >
             <p className="font-semibold">
-              {message.role === "ai" ? "TECO" : "You"}
+              {message.role === "ai" ? "AI Assistant" : "You"}
             </p>
             <p>{message.content}</p>
             {message.code && (

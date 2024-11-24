@@ -9,31 +9,52 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import {
-  LayoutDashboard,
-  UserCircle,
-  GraduationCap,
-  Settings,
+  Home,
+  BookOpen,
+  FolderKanban,
+  Users,
+  BarChart2,
+  Library,
   LogOut,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import React from "react";
+import { LanguageSelector } from "./LanguageSelector";
+import { ThemeSelector } from "./ThemeSelector";
+import logo from "@/assets/BookOpenUser.svg";
 
 const navigation = [
   {
     title: "Dashboard",
+    icon: Home,
     href: "/dashboard",
-    icon: LayoutDashboard,
   },
   {
-    title: "Profile",
-    href: "/profile",
-    icon: UserCircle,
+    title: "Lesson Planner",
+    icon: BookOpen,
+    href: "/lesson-planner",
   },
   {
-    title: "Practice",
-    href: "/practice",
-    icon: GraduationCap,
+    title: "Projects",
+    icon: FolderKanban,
+    href: "/projects",
   },
-];
+  {
+    title: "Resource Hub",
+    icon: Library,
+    href: "/resources",
+  },
+  {
+    title: "Class Management",
+    icon: Users,
+    href: "/class-management",
+  },
+  {
+    title: "Analytics",
+    icon: BarChart2,
+    href: "/analytics",
+  },
+] as const;
 
 function NavUser() {
   const { user, logout } = useAuth();
@@ -83,7 +104,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <Link to="/">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Settings className="size-6" color="#e2e8f0" />
+                  <img src={logo} alt="TECO AI" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate text-lg font-semibold text-slate-200">
@@ -101,7 +122,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton asChild>
                 <Link to={item.href}>
-                  <item.icon className="size-4" />
+                  <item.icon />
                   <span>{item.title}</span>
                 </Link>
               </SidebarMenuButton>
@@ -110,6 +131,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
+        <LanguageSelector />
+        <ThemeSelector />
         <NavUser />
       </SidebarFooter>
     </Sidebar>

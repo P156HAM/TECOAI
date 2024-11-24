@@ -1,8 +1,26 @@
-export interface VideoResource {
+export type ResourceType =
+  | "video"
+  | "article"
+  | "exercise"
+  | "documentation"
+  | "tutorial";
+
+export interface TeachingResource {
   title: string;
   url: string;
-  duration: string;
-  difficulty: "beginner" | "intermediate" | "advanced" | "children";
+  type: ResourceType;
+  duration?: string;
+  difficulty?: "easy" | "medium" | "hard";
+}
+
+export interface ProjectIdea {
+  title: string;
+  description: string;
+  difficulty: "easy" | "medium" | "hard";
+  groupSize: number;
+  materials: string[];
+  estimatedDuration: string;
+  learningObjectives: string[];
 }
 
 export interface RoadmapNode {
@@ -10,14 +28,26 @@ export interface RoadmapNode {
   title: string;
   description: string;
   timeEstimate: string;
-  resources: {
-    title: string;
-    url: string;
+  learningObjectives: string[];
+  teachingStrategies: string[];
+  projectIdeas: ProjectIdea[];
+  resources: TeachingResource[];
+  studentMotivationTips: string[];
+  commonMisconceptions: string[];
+  differentiationStrategies: string[];
+  assessmentIdeas: {
+    type: "quiz" | "project" | "presentation" | "homework";
+    description: string;
+    rubric?: string[];
   }[];
-  videos: VideoResource[];
   dependencies: string[];
   completed: boolean;
-  practicePrompt: string;
+  videos: {
+    title: string;
+    url: string;
+    duration: string;
+  }[];
+  subject: string;
 }
 
 export interface UserProgress {

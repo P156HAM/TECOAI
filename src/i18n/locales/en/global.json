@@ -1,0 +1,27 @@
+{
+  "common": {
+    "darkMode": "Dark Mode",
+    "lightMode": "Light Mode",
+    "language": "Language"
+  },
+  "navigation": {
+    "home": "Home",
+    "roadmap": "Roadmap",
+    "projects": "Projects"
+  },
+  "projects": {
+    "title": "My Projects",
+    "noProjects": "No projects extracted yet. Go to the roadmap to extract some projects!",
+    "from": "From",
+    "difficulty": "Difficulty",
+    "duration": "Duration"
+  },
+  "roadmap": {
+    "extractProject": "Extract Project",
+    "difficulty": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "common": {
+    "darkMode": "Mörkt läge",
+    "lightMode": "Ljust läge",
+    "language": "Språk"
+  },
+  "navigation": {
+    "home": "Hem",
+    "roadmap": "Färdplan",
+    "projects": "Projekt"
+  },
+  "projects": {
+    "title": "Mina Projekt",
+    "noProjects": "Inga projekt extraherade än. Gå till färdplanen för att extrahera några projekt!",
+    "from": "Från",
+    "difficulty": "Svårighetsgrad",
+    "duration": "Varaktighet"
+  },
+  "roadmap": {
+    "extractProject": "Extrahera Projekt",
+    "difficulty": {
+      "easy": "Lätt",
+      "medium": "Medel",
+      "hard": "Svår"
+    }
+  }
+}
