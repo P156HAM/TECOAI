@@ -41,7 +41,7 @@ export default function Profile() {
     setLoading(true);
     try {
       const llm = new ChatOpenAI({
-        modelName: "gpt-4o-mini",
+        modelName: "gpt-4o",
         temperature: 0,
         openAIApiKey: import.meta.env.VITE_OPEN_AI_API_KEY,
       });
@@ -107,9 +107,23 @@ export default function Profile() {
       const response = await llm.invoke([
         {
           role: "system",
-          content: `You are an expert teaching assistant specializing in computer science education. Create a detailed teaching roadmap with pedagogical resources and strategies for instructors.
+          content: `You are an expert teaching assistant. Create a detailed teaching roadmap with pedagogical resources and strategies for instructors.
             Format the response as a JSON array of teaching nodes with lesson plans, teaching strategies, student engagement tips, and educational resources.
-            Important: Return only the raw JSON without any markdown formatting or code blocks. You must follow this scheme: z.array(
+                  Important guidelines:
+      1. For video resources, only use real URLs from YouTube or other educational platforms. Prefer links from:
+         - YouTube channels like Computerphile, CS50, or Khan Academy
+         - Platform-specific courses from Coursera, edX, or Udacity
+      2. Ensure all fields in the schema are populated with meaningful content
+      3. Keep responses focused and concise
+      4. Make sure difficulty levels are appropriate for the specified grade level
+      5. Include practical, hands-on project ideas
+      6. Ensure all URLs are real and functional
+      8. You must generate at least 4 nodes.
+      7. Each node MUST include:
+         - At least 3 videos with real YouTube/educational platform URLs
+         - At least 2 project ideas
+         - At least 4 educational resources
+      8. Return only the raw JSON without any markdown formatting or code blocks. You must follow this scheme: z.array(
           z.object({
             id: z.string(),
             title: z.string(), 
@@ -127,7 +141,7 @@ export default function Profile() {
                 estimatedDuration: z.string(),
                 learningObjectives: z.array(z.string()),
               })
-            ),
+            ).min(2),
             resources: z.array(
               z.object({
                 title: z.string(),
@@ -136,7 +150,7 @@ export default function Profile() {
                 duration: z.string(),
                 difficulty: z.enum(['easy', 'medium', 'hard']),
               })
-            ),
+            ).min(4),
             studentMotivationTips: z.array(z.string()),
             commonMisconceptions: z.array(z.string()),
             differentiationStrategies: z.array(z.string()),
@@ -155,7 +169,7 @@ export default function Profile() {
                 url: z.string(),
                 duration: z.string(),
               })
-            ),
+            ).min(3),
           })
         )`,
         },
