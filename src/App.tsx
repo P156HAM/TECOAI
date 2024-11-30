@@ -108,11 +108,11 @@ function AppContent() {
               }
             />
             <Route
-              path="/resources"
+              path="/assessment"
               element={
                 <ProtectedRoute>
-                  <div>Resources</div>
-                  {/* <ResourceHub /> */}
+                  <div>assessment</div>
+                  {/* <Assessment /> */}
                 </ProtectedRoute>
               }
             />
@@ -126,10 +126,10 @@ function AppContent() {
               }
             />
             <Route
-              path="/analytics"
+              path="/resources"
               element={
                 <ProtectedRoute>
-                  <div>Analytics</div>
+                  <div>resources</div>
                   {/* <Analytics /> */}
                 </ProtectedRoute>
               }

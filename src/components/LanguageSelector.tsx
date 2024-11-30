@@ -7,8 +7,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type Language = "en" | "sv";
-
 export function LanguageSelector() {
   const { language, setLanguage } = useLanguage();
 

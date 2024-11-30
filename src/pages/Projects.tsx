@@ -8,12 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { CircleIcon, BookOpen, FileEdit, AlertCircle } from "lucide-react";
 
 // to do: create content when the user clicks on create content
 // to do: create assessment when the user clicks on create assessment, the assessment should be created and extracted to assessment instead of the resource Hub page.
 // to do: the button should dissapear when the content is generated and a new button should appear to create assessment
 // to do: create a button to delete the project or mark it as not draft anymore.
 // fix the scheme because the AI is creating an object instead of an array.
+
 type Project = {
   id: string;
   title: string;
@@ -184,47 +186,154 @@ export function Projects() {
     }
   };
 
-  return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6 text-foreground">
-        {t("projects.title")}
-      </h1>
+  // Split projects into draft and active
+  const draftProjects = projects.filter(
+    (project) => !generatedContent[project.id]
+  );
+  const activeProjects = projects.filter(
+    (project) => generatedContent[project.id]
+  );
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {projects.map((project) => (
-          <Card key={project.id} className="dark:bg-card">
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <CardTitle className="text-lg text-foreground">
-                  {project.title}
-                </CardTitle>
-                <Badge variant="outline">{project.status}</Badge>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {t("projects.from")}: {project.sourceNode} ({project.subject})
-              </p>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm mb-4 text-foreground">
-                {project.description}
-              </p>
-              <div className="flex gap-2 mb-4">
-                <Badge variant="secondary">{project.difficulty}</Badge>
-                <Badge variant="secondary">{project.estimatedDuration}</Badge>
-              </div>
-              <div className="flex gap-2 mt-4">
-                {!generatedContent[project.id] ? (
+  return (
+    <div className="container mx-auto py-8 space-y-8">
+      <header className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">
+            {t("projects.title")}
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Manage and create your educational projects
+          </p>
+        </div>
+        <div className="flex gap-2 items-center">
+          <Badge variant="secondary" className="gap-1">
+            <FileEdit className="h-3 w-3" />
+            {draftProjects.length} Drafts
+          </Badge>
+          <Badge variant="secondary" className="gap-1">
+            <BookOpen className="h-3 w-3" />
+            {activeProjects.length} Active
+          </Badge>
+        </div>
+      </header>
+
+      {/* Draft Projects Section */}
+      {draftProjects.length > 0 && (
+        <section className="space-y-4">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <FileEdit className="h-5 w-5 text-muted-foreground" />
+            Draft Projects
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {draftProjects.map((project) => (
+              <Card
+                key={project.id}
+                className="dark:bg-card hover:shadow-lg transition-shadow"
+              >
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-lg text-foreground">
+                      {project.title}
+                    </CardTitle>
+                    <Badge variant="outline" className="bg-muted">
+                      Draft
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {t("projects.from")}: {project.sourceNode}
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-foreground line-clamp-2">
+                    {project.description}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary">{project.subject}</Badge>
+                    <Badge variant="secondary">{project.difficulty}</Badge>
+                    <Badge variant="secondary">
+                      {project.estimatedDuration}
+                    </Badge>
+                  </div>
                   <Button
+                    className="w-full"
                     onClick={() => generateProjectContent(project)}
                     disabled={generatingProjectId === project.id}
                   >
-                    {generatingProjectId === project.id
-                      ? "Generating..."
-                      : "Generate Content"}
+                    {generatingProjectId === project.id ? (
+                      <>
+                        <span className="animate-spin mr-2">⚡</span>
+                        Generating...
+                      </>
+                    ) : (
+                      "Generate Content"
+                    )}
                   </Button>
-                ) : (
-                  <>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Active Projects Section */}
+      {activeProjects.length > 0 && (
+        <section className="space-y-4">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-muted-foreground" />
+            Active Projects
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {activeProjects.map((project) => (
+              <Card
+                key={project.id}
+                className="dark:bg-card hover:shadow-lg transition-shadow"
+              >
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-lg text-foreground">
+                      {project.title}
+                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <CircleIcon className="h-2 w-2 fill-green-500 text-green-500 animate-pulse" />
+                      <Badge
+                        variant="outline"
+                        className="bg-green-500/10 text-green-500"
+                      >
+                        Active
+                      </Badge>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {t("projects.from")}: {project.sourceNode}
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-semibold mb-2">
+                        Learning Objectives
+                      </h4>
+                      <ul className="list-disc pl-4 text-sm space-y-1">
+                        {generatedContent[project.id].learningObjectives
+                          .slice(0, 3)
+                          .map((objective: string, i: number) => (
+                            <li key={i} className="text-muted-foreground">
+                              {objective}
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="secondary">{project.subject}</Badge>
+                      <Badge variant="secondary">{project.difficulty}</Badge>
+                      <Badge variant="secondary">
+                        {project.estimatedDuration}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
                     <Button
+                      className="flex-1"
                       onClick={() => handleCreateAssessment(project)}
                       disabled={isGeneratingAssessment === project.id}
                     >
@@ -234,80 +343,28 @@ export function Projects() {
                     </Button>
                     <Button
                       variant="outline"
+                      className="flex-1"
                       onClick={() => handleUpdateProjectStatus(project, false)}
                     >
-                      Mark as Complete
+                      Mark Complete
                     </Button>
-                  </>
-                )}
-              </div>
-
-              {generatedContent[project.id] && (
-                <div className="mt-4 space-y-4">
-                  <h3 className="font-bold">
-                    {generatedContent[project.id].projectTitle}
-                  </h3>
-                  <p>{generatedContent[project.id].description}</p>
-
-                  <div>
-                    <h4 className="font-semibold">Learning Objectives:</h4>
-                    <ul className="list-disc pl-4">
-                      {Object.values(
-                        generatedContent[project.id].learningObjectives
-                      ).map((objective: unknown, i) => (
-                        <li key={i}>{objective as string}</li>
-                      ))}
-                    </ul>
                   </div>
-
-                  <div>
-                    <h4 className="font-semibold">Project Steps:</h4>
-                    {generatedContent[project.id].projectSteps.map(
-                      (
-                        steps: {
-                          step1: string;
-                          step2: string;
-                          step3: string;
-                          step4: string;
-                          step5: string;
-                          step6?: string;
-                        },
-                        i: number
-                      ) => (
-                        <div key={i} className="space-y-2">
-                          <p>{steps.step1}</p>
-                          <p>{steps.step2}</p>
-                          <p>{steps.step3}</p>
-                          <p>{steps.step4}</p>
-                          <p>{steps.step5}</p>
-                          {steps.step6 && <p>{steps.step6}</p>}
-                        </div>
-                      )
-                    )}
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold">Assessment Criteria:</h4>
-                    <ul className="list-disc pl-4">
-                      {Object.values(
-                        generatedContent[project.id].assessmentCriteria
-                      ).map((criterion: unknown, i) => (
-                        <li key={i}>{criterion as string}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-
-        {projects.length === 0 && (
-          <div className="col-span-full text-center py-12 text-muted-foreground">
-            {t("projects.noProjects")}
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        )}
-      </div>
+        </section>
+      )}
+
+      {projects.length === 0 && (
+        <div className="text-center py-12 space-y-4">
+          <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto" />
+          <h3 className="text-lg font-semibold">{t("projects.noProjects")}</h3>
+          <p className="text-muted-foreground">
+            Create your first project to get started
+          </p>
+        </div>
+      )}
     </div>
   );
 }

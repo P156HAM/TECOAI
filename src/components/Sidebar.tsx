@@ -40,7 +40,12 @@ const navigation = [
     href: "/projects",
   },
   {
-    title: "Resource Hub",
+    title: "Assessment",
+    icon: BarChart2,
+    href: "/assessment",
+  },
+  {
+    title: "Resources",
     icon: Library,
     href: "/resources",
   },
@@ -48,11 +53,6 @@ const navigation = [
     title: "Class Management",
     icon: Users,
     href: "/class-management",
-  },
-  {
-    title: "Analytics",
-    icon: BarChart2,
-    href: "/analytics",
   },
 ] as const;
 

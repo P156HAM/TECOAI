@@ -16,12 +16,27 @@
     "difficulty": "Difficulty",
     "duration": "Duration"
   },
-  "roadmap": {
+  "lesson_planner": {
     "extractProject": "Extract Project",
-    "difficulty": {
-      "easy": "Easy",
-      "medium": "Medium",
-      "hard": "Hard"
+    "subject": {
+      "computer_science": "Computer science",
+      "mathematics": "Mathematics",
+      "physics": "Physics",
+      "chemistry": "Chemistry",
+      "biology": "Biology"
+    },
+    "grade_level": {
+      "elementary_school": "Elementary School",
+      "middle_school": "Middle School",
+      "high_school": "High School",
+      "college": "College"
+    },
+    "resource_type": {
+      "video": "Video",
+      "work_sheet": "Work Sheet",
+      "project": "Project",
+      "assessment": "Assessment",
+      "interactive": "Interactive"
     }
   }
 }

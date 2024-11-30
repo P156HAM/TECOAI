@@ -48,6 +48,8 @@ export interface RoadmapNode {
     duration: string;
   }[];
   subject: string;
+  type: "video" | "worksheet" | "base";
+  content: any;
 }
 
 export interface UserProgress {

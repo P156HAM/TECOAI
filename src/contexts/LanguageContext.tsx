@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
+import i18next from "i18next";
 
 type Language = "en" | "sv";
 
@@ -14,8 +15,15 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguage] = useState<Language>("en");
 
+  const handleSetLanguage = (lang: Language) => {
+    setLanguage(lang);
+    i18next.changeLanguage(lang);
+  };
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage }}>
+    <LanguageContext.Provider
+      value={{ language, setLanguage: handleSetLanguage }}
+    >
       {children}
     </LanguageContext.Provider>
   );
