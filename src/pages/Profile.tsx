@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { RoadmapNode as RoadmapNodeType } from "@/types/roadmap";
-import { RoadmapNode } from "@/components/RoadmapNode";
+import { ContentNode } from "@/components/ContentNode";
 import { ContentGenerationForm } from "@/components/ContentGenerationForm";
 import { useContentForm } from "@/hooks/useContentForm";
 import { ContentGenerationFormProps } from "@/components/ContentGenerationForm";
@@ -30,7 +30,7 @@ export default function Profile() {
           <div className="mt-8">
             <div className="grid gap-4 md:grid-cols-2">
               {roadmap.map((node) => (
-                <RoadmapNode key={node.id} node={node} />
+                <ContentNode key={node.id} node={node} />
               ))}
             </div>
           </div>

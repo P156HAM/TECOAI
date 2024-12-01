@@ -9,11 +9,11 @@ export function ThemeSelector() {
     <div className="flex items-center justify-between px-3 py-2">
       <div className="flex items-center gap-2">
         {isDark ? (
-          <Moon className="h-4 w-4 text-muted-foreground" />
+          <Moon className="h-4 w-4 text-foreground" />
         ) : (
-          <Sun className="h-4 w-4 text-muted-foreground" />
+          <Sun className="h-4 w-4 text-foreground" />
         )}
-        <span className="text-sm">Theme</span>
+        <span className="text-sm text-foreground">Theme</span>
       </div>
 
       <button
@@ -30,7 +30,7 @@ export function ThemeSelector() {
           className={`
             ${isDark ? "translate-x-5" : "translate-x-0"}
             flex items-center justify-center h-6 w-6 transform rounded-full bg-white
-            transition-transform duration-200 ease-in-out
+            transition-transform duration-200 ease-in-out 
           `}
         />
         <Moon

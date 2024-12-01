@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import {
   Sidebar,
   SidebarContent,
@@ -58,7 +59,7 @@ const navigation = [
 
 function NavUser() {
   const { user, logout } = useAuth();
-  // must change the logo and add breadcrumbs and test mobile.
+  const { theme } = useTheme();
 
   return (
     <SidebarMenu>
@@ -68,10 +69,12 @@ function NavUser() {
             <img
               src={user?.photoURL || ""}
               alt={user?.displayName || "User"}
-              className="h-8 w-8 rounded-full"
+              className={`h-8 w-8 rounded-full ${
+                theme === "dark" ? "ring-2 ring-white/60" : ""
+              }`}
             />
             <div className="flex-1 overflow-hidden">
-              <p className="truncate text-sm font-medium">
+              <p className="truncate text-sm font-medium text-foreground">
                 {user?.displayName}
               </p>
               <p className="truncate text-xs text-muted-foreground">
@@ -107,7 +110,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <img src={logo} alt="TECO AI" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate text-lg font-semibold text-slate-200">
+                  <span className="truncate text-lg font-semibold text-foreground">
                     TECO AI
                   </span>
                 </div>
@@ -121,7 +124,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {navigation.map((item) => (
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton asChild>
-                <Link to={item.href}>
+                <Link to={item.href} className="text-foreground">
                   <item.icon />
                   <span>{item.title}</span>
                 </Link>

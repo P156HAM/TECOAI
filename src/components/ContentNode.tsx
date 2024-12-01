@@ -1,13 +1,17 @@
 import { BookOpen, Video, ExternalLink } from "lucide-react";
-import { ProjectIdea, RoadmapNode as RoadmapNodeType } from "@/types/roadmap";
+import {
+  ProjectIdea,
+  RoadmapNode as ContentNodeNodeType,
+} from "@/types/roadmap";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { useProjects } from "@/contexts/ProjectContext";
+import { useDispatch } from "react-redux";
+import { createDraft } from "@/store/slices/projectsSlice";
 
-export function RoadmapNode({ node }: { node: RoadmapNodeType }) {
+export function ContentNode({ node }: { node: ContentNodeNodeType }) {
   const navigate = useNavigate();
-  const { addProject } = useProjects();
+  const dispatch = useDispatch();
 
   const handleExtractProject = async (project: ProjectIdea) => {
     try {
@@ -18,10 +22,10 @@ export function RoadmapNode({ node }: { node: RoadmapNodeType }) {
         subject: node.subject,
         status: "draft" as const,
       };
-      addProject(enhancedProject);
+      dispatch(createDraft(enhancedProject));
       navigate("/projects");
     } catch (error) {
-      console.error("Error generating project plan:", error);
+      console.error("Error extracting project:", error);
     }
   };
 

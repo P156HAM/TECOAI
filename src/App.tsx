@@ -42,7 +42,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
           <div className="rounded-xl bg-background min-h-[calc(100vh-2rem)] shadow-lg">
             <header className="flex h-16 shrink-0 items-center gap-2 border-b">
               <div className="flex items-center gap-2 px-4">
-                <SidebarTrigger className="-ml-1" />
+                <SidebarTrigger className="-ml-1 text-foreground" />
                 <Separator orientation="vertical" className="mr-2 h-4" />
                 {/* breadcrumbs to eb added later */}
               </div>

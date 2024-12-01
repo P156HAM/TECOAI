@@ -1,6 +1,5 @@
-import { Subject, GradeLevel, ResourceType } from "@/types/types";
+import { Subject, GradeLevel } from "@/types/types";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,7 +33,7 @@ export function ContentGenerationForm({
   return (
     <Card className="p-6">
       <h1 className="text-2xl font-bold mb-6 text-center">
-        Create Educational Content
+        Create Lesson Plans
       </h1>
 
       <form onSubmit={onSubmit} className="space-y-4">

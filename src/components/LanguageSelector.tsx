@@ -13,8 +13,8 @@ export function LanguageSelector() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-2 outline-none">
-        <Globe className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm">
+        <Globe className="h-4 w-4 text-foreground" />
+        <span className="text-sm text-foreground">
           {language === "en" ? "English" : "Svenska"}
         </span>
       </DropdownMenuTrigger>

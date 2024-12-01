@@ -1,14 +1,42 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ChatOpenAI } from "@langchain/openai";
 import { StructuredOutputParser } from "langchain/output_parsers";
 import { z } from "zod";
-import { useProjects } from "@/contexts/ProjectContext";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import {
+  deleteProject,
+  updateProject,
+  markAsActive,
+} from "@/store/slices/projectsSlice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { CircleIcon, BookOpen, FileEdit, AlertCircle } from "lucide-react";
+import {
+  CircleIcon,
+  BookOpen,
+  FileEdit,
+  AlertCircle,
+  Trash2,
+  Pencil,
+  CheckCircle,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { createSelector } from "@reduxjs/toolkit";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { LoadingSpinner } from "@/components/ui/loadingSpinner";
 
 // to do: create content when the user clicks on create content
 // to do: create assessment when the user clicks on create assessment, the assessment should be created and extracted to assessment instead of the resource Hub page.
@@ -27,12 +55,21 @@ type Project = {
   status: string;
 };
 
+const selectProjects = createSelector(
+  (state: RootState) => state.projects.items,
+  (items) => Object.values(items)
+);
+
 export function Projects() {
-  const { projects } = useProjects();
+  // must fix rerender issue.
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const projects = useSelector(selectProjects);
   const [t] = useTranslation("global");
   const [generatedContent, setGeneratedContent] = useState<Record<string, any>>(
     {}
   );
+  const generatedContentRef = useRef<Record<string, any>>({});
   const [generatingProjectId, setGeneratingProjectId] = useState<string | null>(
     null
   );
@@ -43,6 +80,19 @@ export function Projects() {
   useEffect(() => {
     console.log(t("projects.title"));
   }, []);
+
+  const handleDeleteProject = (projectId: string) => {
+    dispatch(deleteProject(projectId));
+  };
+
+  const handleUpdateProjectStatus = async (project: Project) => {
+    try {
+      dispatch(markAsActive(project.id));
+      // TODO: Implement Firestore sync later
+    } catch (error) {
+      console.error("Error updating project status:", error);
+    }
+  };
 
   const generateProjectContent = async (project: Project) => {
     setGeneratingProjectId(project.id);
@@ -61,21 +111,9 @@ export function Projects() {
           difficultyLevel: z.string(),
           duration: z.string(),
           sourceTopic: z.string(),
-          projectSteps: z.array(
-            z.object({
-              step1: z.string(),
-              step2: z.string(),
-              step3: z.string(),
-              step4: z.string(),
-              step5: z.string(),
-              step6: z.string().optional(),
-            })
-          ),
           learningObjectives: z.array(z.string()),
           assessmentCriteria: z.array(z.string()),
           teachingGuidelines: z.array(z.string()),
-          commonChallenges: z.array(z.string()),
-          extendedLearningOpportunities: z.array(z.string()),
         })
       );
 
@@ -92,15 +130,6 @@ export function Projects() {
             "difficultyLevel": "string",
             "duration": "string",
             "sourceTopic": "string",
-            "projectSteps": [
-              {
-                "step1": "string",
-                "step2": "string",
-                "step3": "string",
-                "step4": "string",
-                "step5": "string"
-              }
-            ],
             "learningObjectives": [
               "string",
               "string",
@@ -115,24 +144,13 @@ export function Projects() {
               "string",
               "string",
               "string"
-            ],
-            "commonChallenges": [
-              "string",
-              "string",
-              "string"
-            ],
-            "extendedLearningOpportunities": [
-              "string",
-              "string",
-              "string"
             ]
           }
 
           Important:
           1. ALL arrays must be arrays of strings, not objects
-          2. projectSteps must be an array containing one object with step1 through step5
-          3. Do not include any additional fields
-          4. Return only the raw JSON without any markdown formatting or code blocks`,
+          2. Do not include any additional fields
+          3. Return only the raw JSON without any markdown formatting or code blocks`,
         },
         {
           role: "user",
@@ -146,23 +164,40 @@ export function Projects() {
         },
       ]);
 
+      console.log("AI Response:", response.content);
+
       const cleanContent = (response.content as string)
         .replace(/```json\n?/g, "")
         .replace(/```\n?/g, "")
         .replace(/,(\s*[}\]])/g, "$1")
         .trim();
 
-      const parsedContent = await parser.parse(cleanContent);
-      setGeneratedContent((prev) => ({
-        ...prev,
-        [project.id]: parsedContent,
-      }));
+      let parsedContent;
+      try {
+        parsedContent = await parser.parse(cleanContent);
+      } catch (parseError) {
+        console.error("Parsing error:", parseError);
+        throw new Error("Invalid response format from AI.");
+      }
+
+      dispatch(markAsActive(project.id));
+
+      generatedContentRef.current[project.id] = parsedContent;
+      setGeneratedContent({ ...generatedContentRef.current });
+      console.log(
+        "Updated Generated Content (Ref):",
+        generatedContentRef.current
+      );
     } catch (error) {
       console.error("Error generating project content:", error);
     } finally {
       setGeneratingProjectId(null);
     }
   };
+
+  useEffect(() => {
+    console.log("Generated Content:", generatedContent);
+  }, [generatedContent]);
 
   const handleCreateAssessment = async (project: Project) => {
     setIsGeneratingAssessment(project.id);
@@ -174,24 +209,12 @@ export function Projects() {
     }
   };
 
-  const handleUpdateProjectStatus = async (
-    project: Project,
-    isDraft: boolean
-  ) => {
-    try {
-      // TODO: Implement status update logic
-      console.log("Updating project status:", project.id, isDraft);
-    } catch (error) {
-      console.error("Error updating project status:", error);
-    }
-  };
-
   // Split projects into draft and active
   const draftProjects = projects.filter(
-    (project) => !generatedContent[project.id]
+    (project) => project.status === "draft"
   );
   const activeProjects = projects.filter(
-    (project) => generatedContent[project.id]
+    (project) => project.status === "active"
   );
 
   return (
@@ -205,69 +228,131 @@ export function Projects() {
             Manage and create your educational projects
           </p>
         </div>
-        <div className="flex gap-2 items-center">
-          <Badge variant="secondary" className="gap-1">
-            <FileEdit className="h-3 w-3" />
-            {draftProjects.length} Drafts
-          </Badge>
-          <Badge variant="secondary" className="gap-1">
-            <BookOpen className="h-3 w-3" />
-            {activeProjects.length} Active
-          </Badge>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors">
+            <div className="flex items-center gap-1.5">
+              <FileEdit className="h-4 w-4 text-foreground" />
+              <span className="font-medium text-foreground">
+                {draftProjects.length}
+              </span>
+            </div>
+            <span className="text-sm text-foreground">Draft Projects</span>
+          </div>
+
+          <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors">
+            <div className="flex items-center gap-1.5">
+              <BookOpen className="h-4 w-4 text-foreground" />
+              <span className="font-medium text-foreground">
+                {activeProjects.length}
+              </span>
+            </div>
+            <span className="text-sm text-foreground">Active Projects</span>
+          </div>
         </div>
       </header>
 
       {/* Draft Projects Section */}
       {draftProjects.length > 0 && (
         <section className="space-y-4">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
+          <h2 className="text-xl font-semibold flex items-center gap-2 text-foreground">
             <FileEdit className="h-5 w-5 text-muted-foreground" />
             Draft Projects
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {draftProjects.map((project) => (
-              <Card
-                key={project.id}
-                className="dark:bg-card hover:shadow-lg transition-shadow"
-              >
+              <Card key={project.id}>
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <CardTitle className="text-lg text-foreground">
                       {project.title}
                     </CardTitle>
-                    <Badge variant="outline" className="bg-muted">
-                      Draft
-                    </Badge>
+                    <div className="flex gap-2">
+                      <Badge variant="outline" className="bg-muted">
+                        Draft
+                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteProject(project.id)}
+                      >
+                        <Trash2 className="h-4 w-4" color="#ef4444" />
+                      </Button>
+                    </div>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {t("projects.from")}: {project.sourceNode}
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-sm text-foreground line-clamp-2">
-                    {project.description}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary">{project.subject}</Badge>
-                    <Badge variant="secondary">{project.difficulty}</Badge>
-                    <Badge variant="secondary">
-                      {project.estimatedDuration}
-                    </Badge>
-                  </div>
-                  <Button
-                    className="w-full"
-                    onClick={() => generateProjectContent(project)}
-                    disabled={generatingProjectId === project.id}
-                  >
-                    {generatingProjectId === project.id ? (
-                      <>
-                        <span className="animate-spin mr-2">⚡</span>
-                        Generating...
-                      </>
-                    ) : (
-                      "Generate Content"
-                    )}
-                  </Button>
+                  {generatedContent[project.id] ? (
+                    <>
+                      <div>
+                        <h4 className="font-semibold mb-2">Description</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {generatedContent[project.id].description}
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-2">
+                          Learning Objectives
+                        </h4>
+                        <ul className="list-disc pl-4 text-sm space-y-1">
+                          {generatedContent[project.id].learningObjectives
+                            .slice(0, 3)
+                            .map((objective: string, i: number) => (
+                              <li key={i} className="text-muted-foreground">
+                                {objective}
+                              </li>
+                            ))}
+                        </ul>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => handleUpdateProjectStatus(project)}
+                        >
+                          Mark Active
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() =>
+                            navigate(`/edit-project/${project.id}`)
+                          }
+                        >
+                          Edit Project
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm text-foreground line-clamp-2">
+                        {project.description}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="secondary">{project.subject}</Badge>
+                        <Badge variant="secondary">{project.difficulty}</Badge>
+                        <Badge variant="secondary">
+                          {project.estimatedDuration}
+                        </Badge>
+                      </div>
+                      <Button
+                        className="flex-1"
+                        onClick={() => generateProjectContent(project)}
+                        disabled={generatingProjectId === project.id}
+                      >
+                        {generatingProjectId === project.id ? (
+                          <>
+                            <LoadingSpinner />
+                            Generating...
+                          </>
+                        ) : (
+                          "Generate Content"
+                        )}
+                      </Button>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -309,28 +394,63 @@ export function Projects() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-4">
-                    <div>
-                      <h4 className="font-semibold mb-2">
-                        Learning Objectives
-                      </h4>
-                      <ul className="list-disc pl-4 text-sm space-y-1">
-                        {generatedContent[project.id].learningObjectives
-                          .slice(0, 3)
-                          .map((objective: string, i: number) => (
-                            <li key={i} className="text-muted-foreground">
-                              {objective}
-                            </li>
-                          ))}
-                      </ul>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary">{project.subject}</Badge>
-                      <Badge variant="secondary">{project.difficulty}</Badge>
-                      <Badge variant="secondary">
-                        {project.estimatedDuration}
-                      </Badge>
-                    </div>
+                    <Accordion type="single" collapsible>
+                      <AccordionItem value="item-1">
+                        <AccordionTrigger>Learning Objectives</AccordionTrigger>
+                        <AccordionContent>
+                          <ul className="list-disc pl-4 text-sm space-y-1">
+                            {generatedContent[project.id]?.learningObjectives
+                              ?.slice(0, 3)
+                              .map((objective: string, i: number) => (
+                                <li key={i} className="text-muted-foreground">
+                                  {objective}
+                                </li>
+                              )) || <li>No learning objectives available.</li>}
+                          </ul>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                    <Accordion type="single" collapsible>
+                      <AccordionItem value="item-2">
+                        <AccordionTrigger>Assessment Criteria</AccordionTrigger>
+                        <AccordionContent>
+                          <ul className="list-disc pl-4 text-sm space-y-1">
+                            {generatedContent[project.id]?.assessmentCriteria
+                              ?.slice(0, 3)
+                              .map((objective: string, i: number) => (
+                                <li key={i} className="text-muted-foreground">
+                                  {objective}
+                                </li>
+                              )) || <li>No learning objectives available.</li>}
+                          </ul>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                    <Accordion type="single" collapsible>
+                      <AccordionItem value="item-3">
+                        <AccordionTrigger>Teaching Guidelines</AccordionTrigger>
+                        <AccordionContent>
+                          <ul className="list-disc pl-4 text-sm space-y-1">
+                            {generatedContent[project.id]?.teachingGuidelines
+                              ?.slice(0, 3)
+                              .map((objective: string, i: number) => (
+                                <li key={i} className="text-muted-foreground">
+                                  {objective}
+                                </li>
+                              )) || <li>No learning objectives available.</li>}
+                          </ul>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
                   </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary">{project.subject}</Badge>
+                    <Badge variant="secondary">{project.difficulty}</Badge>
+                    <Badge variant="secondary">
+                      {project.estimatedDuration}
+                    </Badge>
+                  </div>
+
                   <div className="flex gap-2">
                     <Button
                       className="flex-1"
@@ -341,13 +461,32 @@ export function Projects() {
                         ? "Creating..."
                         : "Create Assessment"}
                     </Button>
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      onClick={() => handleUpdateProjectStatus(project, false)}
-                    >
-                      Mark Complete
-                    </Button>
+                    <div className="flex gap-2">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon"
+                            onClick={() => handleUpdateProjectStatus(project)}
+                          >
+                            <CheckCircle className="h-5 w-5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Mark as complete</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon"
+                            onClick={() =>
+                              navigate(`/edit-project/${project.id}`)
+                            }
+                          >
+                            <Pencil className="h-5 w-5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Edit Project</TooltipContent>
+                      </Tooltip>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -357,12 +496,23 @@ export function Projects() {
       )}
 
       {projects.length === 0 && (
-        <div className="text-center py-12 space-y-4">
-          <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto" />
-          <h3 className="text-lg font-semibold">{t("projects.noProjects")}</h3>
-          <p className="text-muted-foreground">
-            Create your first project to get started
+        <div className="flex flex-col items-center justify-center min-h-[400px] bg-muted/30 rounded-lg border-2 border-dashed border-muted-foreground/25 p-8">
+          <AlertCircle className="h-16 w-16 text-muted-foreground/70 animate-pulse mb-6" />
+          <h3 className="text-2xl font-semibold text-primary mb-3">
+            {t("projects.noProjects")}
+          </h3>
+          <p className="text-muted-foreground text-center max-w-md mb-8">
+            Start your learning journey by creating your first project. Turn
+            your learning objectives into actionable projects.
           </p>
+          <Button
+            size="lg"
+            className="gap-2"
+            onClick={() => navigate("/lesson-planner")}
+          >
+            <FileEdit className="h-5 w-5" />
+            Create Your First Project
+          </Button>
         </div>
       )}
     </div>
